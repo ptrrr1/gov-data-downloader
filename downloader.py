@@ -18,7 +18,14 @@ from datetime import datetime
 #
 
 class Downloader:
-    def __init__(self, url, output_path):
+    """
+    :param str url: Url containing folders or zipped folders
+    :param str output_path: Path to folder output
+    :param list whitelist: Patterns to use when downloading a zip
+    """
+
+    def __init__(self, url, output_path, whitelist=[]):
+        self.whitelist = whitelist
         self.url = url
         self.response = self.__get_url_response(url)
         self.output_path = output_path
@@ -28,7 +35,7 @@ class Downloader:
         except Exception as e:
             print(f"Failed to create dir {e}")
 
-    def __check_diff(self, url, file_name):
+    def __check_diff(self, url, file_name) -> bool:
         if not os.path.isfile(file_name):
             # Hasn't been downloaded yet
             return True
@@ -44,7 +51,7 @@ class Downloader:
         # Same file
         return False
 
-    def __get_url_response(self, url):
+    def __get_url_response(self, url) -> requests.Response:
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -54,7 +61,7 @@ class Downloader:
         except Exception as e:
             print(f"Some error occurred: {e}")
 
-    def __get_folders_link(self):
+    def __get_folders_link(self) -> list:
         soup = BeautifulSoup(self.response.text, "html.parser")
         links = [
                     a['href'] for a in soup.find_all('a', href=True)
@@ -64,7 +71,7 @@ class Downloader:
         # First one is not one of the folders, it is the parent folder
         return links[1:]
 
-    def __get_zip_links(self, url):
+    def __get_zip_links(self, url) -> list:
         response = self.__get_url_response(url)
         soup = BeautifulSoup(response.text, "html.parser")
         links = [
@@ -72,7 +79,18 @@ class Downloader:
                     if a['href'].endswith('.zip')
                 ]
 
-        return links
+        # List is empty
+        if not self.whitelist:
+            return links
+
+        # TODO: Write more efficient way to Whitlelist
+        whitelisted = []
+        for w in self.whitelist:
+            for l in links:
+                if w.lower() in l.replace("%20", " ").lower():
+                    whitelisted.append(l)
+
+        return whitelisted
 
     def __download(self, zip_files, url, path):
         for z in zip_files:
@@ -94,8 +112,12 @@ class Downloader:
     # Not truly recursive as it only searches one level and then looks for zips
     # TODO: Make actually recursive
     def recursive_download(self, start_range=None, end_range=None):
-        folders = self.__get_folders_link()
+        """
+        :param float start_range: Starting folder index. Default None.
+        :param float end_range: Last folder index. Default None.
+        """
 
+        folders = self.__get_folders_link()
         for f in folders[start_range:end_range]:
             # f[:-1] is to remove '/' at the end
             path = os.path.join(self.output_path, f[:-1])
@@ -110,22 +132,17 @@ class Downloader:
 
     async def __async_download_zip(self, url, session, file_name, folder_path):
         file_name = file_name.replace("%20", " ")
+        path = os.path.join(folder_path, file_name)
         try:
             async with session.get(url) as response:
-                if response.status != 200:
-                    print(f"Failed to download {file_name}")
-                    return
-
+                response.raise_for_status()
                 # If it hasn't been dowloaded yet, then download
                 # Since it compares the zip folder,
                 # if it is deleted then it'll try again
-                path = os.path.join(folder_path, file_name)
                 if self.__check_diff(url, path):
                     # Using Wget to download,
                     # tried other methods, this seemed more reliable
                     wget.download(url, out=path)
-                    # print(f"Downloaded {file_name}")
-
                     # Extract
                     try:
                         with zipfile.ZipFile(path, 'r') as z:
@@ -140,19 +157,29 @@ class Downloader:
             print(f"Error downloading {file_name} - {e}")
 
     async def __async_download(self, base_url, zip_url, folder_path):
-        async with aiohttp.ClientSession(trust_env=True) as s:
+        timeout = aiohttp.ClientTimeout(total=60*10)
+        async with aiohttp.ClientSession(trust_env=True, timeout=timeout) as s:
             tasks = [self.__async_download_zip(base_url + z, s, z, folder_path) for z in zip_url]
             await asyncio.gather(*tasks)
 
     def async_download(self):
+        """
+        Downloads all or whitelisted zips in current folder.
+        """
         zip_files = self.__get_zip_links(self.url)
         asyncio.run(self.__async_download(self.url, zip_files, self.output_path))
 
     # Not truly recursive as it only searches one level and then looks for zips
     # TODO: Make actually recursive
     def async_recursive_download(self, start_range=None, end_range=None):
-        folders = self.__get_folders_link()
+        """
+        Downloads all or whitelisted zips while traversing folders.
 
+        :param float start_range: Starting folder index. Default None.
+        :param float end_range: Last folder index. Default None.
+        """
+
+        folders = self.__get_folders_link()
         for f in folders[start_range:end_range]:
             # f[:-1] is to remove '/' at the end
             path = os.path.join(self.output_path, f[:-1])
