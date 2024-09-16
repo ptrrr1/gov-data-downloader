@@ -17,6 +17,7 @@ from datetime import datetime
 # 3. Does not compare before downloading, it may try to redownload everything (TODO)
 #
 
+
 class Downloader:
     """
     :param str url: Url containing folders or zipped folders
@@ -51,7 +52,7 @@ class Downloader:
         # Same file
         return False
 
-    def __get_url_response(self, url) -> requests.Response:
+    def __get_url_response(self, url):
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -135,30 +136,43 @@ class Downloader:
         path = os.path.join(folder_path, file_name)
         try:
             async with session.get(url) as response:
-                response.raise_for_status()
+                # response.raise_for_status()
                 # If it hasn't been dowloaded yet, then download
                 # Since it compares the zip folder,
                 # if it is deleted then it'll try again
                 if self.__check_diff(url, path):
-                    # Using Wget to download,
-                    # tried other methods, this seemed more reliable
+                    # Using Wget to download, i tried other methods,
+                    # but this seemed more reliable for larger files
                     wget.download(url, out=path)
-                    # Extract
-                    try:
-                        with zipfile.ZipFile(path, 'r') as z:
-                            z.extractall(folder_path)
-
-                        print(f"Downloaded and Extracted {file_name}")
-
-                    except Exception as e:
-                        print(f"Failed to extract {file_name} - {e}")
-
+                else:
+                    print(f"{file_name} has already been downloaded!")
         except Exception as e:
             print(f"Error downloading {file_name} - {e}")
+            raise
+
+        # Extract
+        try:
+            with zipfile.ZipFile(path, 'r') as z:
+                z.extractall(folder_path)
+
+            print(f"Downloaded and Extracted {file_name}")
+
+        except Exception as e:
+            print(f"Failed to extract {file_name} - {e}")
 
     async def __async_download(self, base_url, zip_url, folder_path):
-        timeout = aiohttp.ClientTimeout(total=60*10)
-        async with aiohttp.ClientSession(trust_env=True, timeout=timeout) as s:
+        timeout = aiohttp.ClientTimeout(total=60*5)
+        conn = aiohttp.TCPConnector(
+            limit=5,
+            limit_per_host=5,
+            ssl=True,
+            happy_eyeballs_delay=1.0
+            )
+        async with aiohttp.ClientSession(
+            trust_env=True,
+            timeout=timeout,
+            connector=conn
+        ) as s:
             tasks = [self.__async_download_zip(base_url + z, s, z, folder_path) for z in zip_url]
             await asyncio.gather(*tasks)
 
@@ -187,9 +201,12 @@ class Downloader:
                 os.mkdir(path)
 
             base_url = self.url + f
-            print(f"At: {f} Start Timestamp: {datetime.now().strftime("%H:%M:%S")}")
+
+            cur_time = datetime.now().strftime("%H:%M:%S")
+            print(f"At: {f} Start Timestamp: {cur_time}")
 
             zip_files = self.__get_zip_links(base_url)
             asyncio.run(self.__async_download(base_url, zip_files, path))
 
-            print(f"At: {f} End Timestamp: {datetime.now().strftime("%H:%M:%S")}")
+            cur_time = datetime.now().strftime("%H:%M:%S")
+            print(f"At: {f} End Timestamp: {cur_time}")
