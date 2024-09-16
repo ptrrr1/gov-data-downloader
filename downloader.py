@@ -8,19 +8,25 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+#
+# Async download is only recommended for folders, as of now.
+# Though it works without problems most of the time, it is very prone to erros
+# Normal download is ideal for every other use case. The only problem is that:
+# 1. It is slower compared to async;
+# 2. Current method loads evey file in memory and then extracts
+# 3. Does not compare before downloading, it may try to redownload everything (TODO)
+#
 
 class Downloader:
-    def __init__(self, url, output_path, size=1024):
+    def __init__(self, url, output_path):
         self.url = url
-        response = self.__get_url_response(url)
-        if response is not None:
-            self.response = response
-
+        self.response = self.__get_url_response(url)
         self.output_path = output_path
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
-
-        self.size = size
+        try:
+            if not os.path.exists(output_path):
+                os.mkdir(output_path)
+        except Exception as e:
+            print(f"Failed to create dir {e}")
 
     def __check_diff(self, url, file_name):
         if not os.path.isfile(file_name):
@@ -39,14 +45,14 @@ class Downloader:
         return False
 
     def __get_url_response(self, url):
-        response = requests.get(url)
-
-        if response.status_code != 200:
-            print("Failed to load page.")
-            print(f"Status Code: {self.response.status_code}")
-            return None
-
-        return response
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err}")
+        except Exception as e:
+            print(f"Some error occurred: {e}")
 
     def __get_folders_link(self):
         soup = BeautifulSoup(self.response.text, "html.parser")
@@ -72,16 +78,14 @@ class Downloader:
         for z in zip_files:
             full_zip_url = url + z
             file_name = z.replace("%20", " ")
-
             response = self.__get_url_response(full_zip_url)
-            if response is not None:
-                try:
-                    # Stores in memory then extracts
-                    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                        z.extractall(path)
-                    print(f"Downloaded and Extracted {file_name}")
-                except Exception as e:
-                    print(f"Failed to download {file_name} - {e}")
+            try:
+                # Stores in memory then extracts
+                with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                    z.extractall(path)
+                print(f"Downloaded and Extracted {file_name}")
+            except Exception as e:
+                print(f"Failed to download {file_name} - {e}")
 
     def download(self):
         zip_files = self.__get_zip_links(self.url)
@@ -119,7 +123,6 @@ class Downloader:
                 if self.__check_diff(url, path):
                     # Using Wget to download,
                     # tried other methods, this seemed more reliable
-                    print(url)
                     wget.download(url, out=path)
                     # print(f"Downloaded {file_name}")
 
@@ -137,7 +140,7 @@ class Downloader:
             print(f"Error downloading {file_name} - {e}")
 
     async def __async_download(self, base_url, zip_url, folder_path):
-        async with aiohttp.ClientSession() as s:
+        async with aiohttp.ClientSession(trust_env=True) as s:
             tasks = [self.__async_download_zip(base_url + z, s, z, folder_path) for z in zip_url]
             await asyncio.gather(*tasks)
 
@@ -157,7 +160,9 @@ class Downloader:
                 os.mkdir(path)
 
             base_url = self.url + f
-            print(f"At: {f} Timestamp: {datetime.now().strftime("%H:%M:%S")}")
+            print(f"At: {f} Start Timestamp: {datetime.now().strftime("%H:%M:%S")}")
 
             zip_files = self.__get_zip_links(base_url)
             asyncio.run(self.__async_download(base_url, zip_files, path))
+
+            print(f"At: {f} End Timestamp: {datetime.now().strftime("%H:%M:%S")}")
