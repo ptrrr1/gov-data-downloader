@@ -4,6 +4,8 @@ from sqlhandler import SQLHandler
 import pandas as pd
 from sqlalchemy import create_engine
 
+# DOWNLOAD
+
 # Extract to
 output = "./output"
 
@@ -18,14 +20,22 @@ whitelist = []
 # url = "https://dados.rfb.gov.br/CNPJ/"
 # Downloader(url, output_path).recursive_download(start_range=1)
 
+# TO SQL
+
+# Getting the most recently created folder
 extracted_files = [os.path.join(output, d) for d in os.listdir(output)]
 extracted_files = [d for d in extracted_files if os.path.isdir(d)]
-sorted(extracted_files, key=lambda x: os.path.getctime(x), reverse=True)[:1]
+extracted_files = sorted(
+                        extracted_files,
+                        key=lambda x: os.path.getctime(x),
+                        reverse=True
+                        )[0]
 
 # List files
-items = [n for n in os.listdir(extracted_files[0]) if not n.endswith('.zip')]
+files = [n for n in os.listdir(extracted_files) if not n.endswith('.zip')]
 
 # Grouping files
+# Information os size as of 2024-08
 simples = []  # 1 File - 2GB
 cnae = []  # 1 File
 moti = []  # 1 File
@@ -37,7 +47,7 @@ empre = []  # 10 Files - 4GB Total
 estabele = []  # 10 Files - 13GB Total
 socio = []  # 10 Files - 2GB Total
 
-for i in items:
+for i in files:
     if i.find("SIMPLES") > -1:
         simples.append(i)
     elif i.find("CNAE") > -1:
@@ -61,6 +71,8 @@ for i in items:
     else:
         print(i)
 
+engine = create_engine("sqlite+pysqlite:///:memory:")
+
 # Smaller Files
 
 cnae_dtype = {'codigo': 'object', 'descricao': 'object'}
@@ -69,47 +81,47 @@ cnae_pd = SQLHandler(
     extracted_files,
     cnae,
     cnae_dtype
-    ).to_sql('cnae', engine)
+    ).to_sql_db('cnae', engine)
 
-# moti_dtype = {'codigo': 'object', 'descricao': 'object'}
-# 
-# moti_pd = SQLHandler(
-#     extracted_files,
-#     moti,
-#     moti_dtype
-#     ).to_sql('moti'), engine
-# 
-# munic_dtype = {'codigo': 'object', 'descricao': 'object'}
-# 
-# munic_pd = SQLHandler(
-#     extracted_files,
-#     munic,
-#     munic_dtype
-#     ).to_sql('munic', engine)
-# 
-# natju_dtype = {'codigo': 'object', 'descricao': 'object'}
-# 
-# natju_pd = SQLHandler(
-#     extracted_files,
-#     natju,
-#     natju_dtype
-#     ).to_sql('natju', engine)
-# 
-# pais_dtype = {'codigo': 'object', 'descricao': 'object'}
-# 
-# pais_pd = SQLHandler(
-#     extracted_files,
-#     pais,
-#     pais_dtype
-#     ).to_sql('pais'), engine
-# 
-# quals_dtype = {'codigo': 'object', 'descricao': 'object'}
-# 
-# quals_pd = SQLHandler(
-#     extracted_files,
-#     quals,
-#     quals_dtype
-#     ).to_sql('quals', engine)
+moti_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+moti_pd = SQLHandler(
+    extracted_files,
+    moti,
+    moti_dtype
+    ).to_sql_db('moti', engine)
+
+munic_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+munic_pd = SQLHandler(
+    extracted_files,
+    munic,
+    munic_dtype
+    ).to_sql_db('munic', engine)
+
+natju_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+natju_pd = SQLHandler(
+    extracted_files,
+    natju,
+    natju_dtype
+    ).to_sql_db('natju', engine)
+
+pais_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+pais_pd = SQLHandler(
+    extracted_files,
+    pais,
+    pais_dtype
+    ).to_sql_db('pais', engine)
+
+quals_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+quals_pd = SQLHandler(
+    extracted_files,
+    quals,
+    quals_dtype
+    ).to_sql_db('quals', engine)
 
 # Bigger Files
 
@@ -127,4 +139,14 @@ cnae_pd = SQLHandler(
 #     extracted_files,
 #     simples,
 #     simples_dtype
-#     ).to_sql()
+#     ).to_sql_db('simples', engine)
+
+# from sqlalchemy import MetaData
+# 
+# m = MetaData()
+# m.reflect(engine)
+# 
+# for t in m.tables.values():
+#     print(t.name)
+#     for c in t.c:
+#         print(" "*10 + c.name)

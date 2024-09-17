@@ -42,7 +42,8 @@ class SQLHandler:
 
         return dt
 
-    def to_sql(self, name, engine):
+    def to_sql_db(self, name, engine):
+        # TODO: DROP TABLE BEFORE ADDING MORE DATA
         size_to_read = 1_000_000
         lines = 0
         skiprows = 0
@@ -71,10 +72,20 @@ class SQLHandler:
 
                 skiprows += size_to_read
 
-                df.to_sql(
+                self.__to_sql(
                     df,
                     name=name,
                     con=engine,
                     if_exists='append',
                     index=False
                     )
+
+    def __to_sql(self, df, **kwargs):
+        size = 4096
+        total = len(df)
+
+        def chunker(df):
+            return (df[i:i + size] for i in range(0, len(df), size))
+
+        for i, dt in enumerate(chunker(df)):
+            dt.to_sql(**kwargs)
