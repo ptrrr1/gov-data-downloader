@@ -1,6 +1,7 @@
 import os
 import math
 import pandas as pd
+from sqlalchemy import create_engine, text
 
 
 class SQLHandler:
@@ -34,12 +35,19 @@ class SQLHandler:
         return df
 
     def to_sql_db(self, name, engine):
-        # TODO: DROP TABLE IF EXISTS BEFORE ADDING MORE DATA
         size_to_read = 1_024_000
         lines = 0
         skiprows = 0
 
+        # Drop table before adding newer data
+        sql_cmd = text(f'DROP TABLE IF EXISTS {name};')
+        with engine.connect() as conn:
+            conn.execute(sql_cmd)
+            conn.commit()
+
+        # Loop through files in chunks and add the data to the database
         for f in self.path_list:
+            print(f'Table {name} - On file {f}')
             path = os.path.join(self.folder, f)
 
             with open(path) as file:

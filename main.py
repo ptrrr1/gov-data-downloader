@@ -3,6 +3,7 @@ from downloader import Downloader
 from sqlhandler import SQLHandler
 import pandas as pd
 from sqlalchemy import create_engine
+import credentials
 
 # DOWNLOAD
 
@@ -71,76 +72,104 @@ for i in files:
     else:
         print(i)
 
-engine = create_engine("sqlite+pysqlite:///:memory:")
+# Establishing connection to the SQL database
+# Example:
+# engine = create_engine("sqlite+pysqlite:///:memory:")
+# "sqlite+pysqlite:///:memory:" stands for:
+# 1. Type (sqlite)
+# 2. Python Database API Specification (pysqlite)
+# 3. Location (/:memory:) (in memory)
+
+user = credentials.user  # os.getenv('DB_USER')
+passw = credentials.passw  # os.getenv('DB_PASSWORD')
+host = credentials.host  # os.getenv('DB_HOST')
+port = credentials.port  # os.getenv('DB_PORT')
+database = credentials.database  # os.getenv('DB_NAME')
+
+# Connection to PostgreSQL
+engine = create_engine('postgresql://'+user+':'+passw +
+                       '@'+host+':'+port+'/'+database)
 
 # Smaller Files
 
-cnae_dtype = {'codigo': 'object', 'descricao': 'object'}
-
-cnae_pd = SQLHandler(
-    extracted_files,
-    cnae,
-    cnae_dtype
-    ).to_sql_db('cnae', engine)
-
-moti_dtype = {'codigo': 'object', 'descricao': 'object'}
-
-moti_pd = SQLHandler(
-    extracted_files,
-    moti,
-    moti_dtype
-    ).to_sql_db('moti', engine)
-
-munic_dtype = {'codigo': 'object', 'descricao': 'object'}
-
-munic_pd = SQLHandler(
-    extracted_files,
-    munic,
-    munic_dtype
-    ).to_sql_db('munic', engine)
-
-natju_dtype = {'codigo': 'object', 'descricao': 'object'}
-
-natju_pd = SQLHandler(
-    extracted_files,
-    natju,
-    natju_dtype
-    ).to_sql_db('natju', engine)
-
-pais_dtype = {'codigo': 'object', 'descricao': 'object'}
-
-pais_pd = SQLHandler(
-    extracted_files,
-    pais,
-    pais_dtype
-    ).to_sql_db('pais', engine)
-
-quals_dtype = {'codigo': 'object', 'descricao': 'object'}
-
-quals_pd = SQLHandler(
-    extracted_files,
-    quals,
-    quals_dtype
-    ).to_sql_db('quals', engine)
+#  cnae_dtype = {'codigo': 'object', 'descricao': 'object'}
+#  
+#  cnae_pd = SQLHandler(
+#      extracted_files,
+#      cnae,
+#      cnae_dtype
+#      ).to_sql_db('cnae', engine)
+#  
+#  # ---
+#  
+#  moti_dtype = {'codigo': 'object', 'descricao': 'object'}
+#  
+#  moti_pd = SQLHandler(
+#      extracted_files,
+#      moti,
+#      moti_dtype
+#      ).to_sql_db('moti', engine)
+#  
+#  # ---
+#  
+#  munic_dtype = {'codigo': 'object', 'descricao': 'object'}
+#  
+#  munic_pd = SQLHandler(
+#      extracted_files,
+#      munic,
+#      munic_dtype
+#      ).to_sql_db('munic', engine)
+#  
+#  natju_dtype = {'codigo': 'object', 'descricao': 'object'}
+#  
+#  # ---
+#  
+#  natju_pd = SQLHandler(
+#      extracted_files,
+#      natju,
+#      natju_dtype
+#      ).to_sql_db('natju', engine)
+#  
+#  # ---
+#  
+#  pais_dtype = {'codigo': 'object', 'descricao': 'object'}
+#  
+#  pais_pd = SQLHandler(
+#      extracted_files,
+#      pais,
+#      pais_dtype
+#      ).to_sql_db('pais', engine)
+#  
+#  # ---
+#  
+#  quals_dtype = {'codigo': 'object', 'descricao': 'object'}
+#  
+#  quals_pd = SQLHandler(
+#      extracted_files,
+#      quals,
+#      quals_dtype
+#      ).to_sql_db('quals', engine)
 
 # Bigger Files
 
-# simples_dtype = {
-#         'cnpj_basico': 'object',
-#         'opcao_pelo_simples': 'object',
-#         'data_opcao_simples': 'Int32',
-#         'data_exclusao_simples': 'Int32',
-#         'opcao_mei': 'object',
-#         'data_opcao_mei': 'Int32',
-#         'data_exclusao_mei': 'Int32'
-#         }
-#
-# simples_pd = SQLHandler(
-#     extracted_files,
-#     simples,
-#     simples_dtype
-#     ).to_sql_db('simples', engine)
-#
+simples_dtype = {
+        'cnpj_basico': 'object',
+        'opcao_pelo_simples': 'object',
+        'data_opcao_simples': 'Int32',
+        'data_exclusao_simples': 'Int32',
+        'opcao_mei': 'object',
+        'data_opcao_mei': 'Int32',
+        'data_exclusao_mei': 'Int32'
+        }
+
+simples_pd = SQLHandler(
+    extracted_files,
+    simples,
+    simples_dtype
+    ).to_sql_db('simples', engine)
+
+# ---
+
 # socio_dtype = {
 #     'cnpj_basico': 'object',
 #     'identificador_socio': 'Int32',
@@ -160,7 +189,9 @@ quals_pd = SQLHandler(
 #     socio,
 #     socio_dtype
 #     ).as_pdDataframe()
-#
+
+# ---
+
 # empre_dtype = {
 #     'cnpj_basico': 'object',
 #     'razao_social': 'object',
@@ -176,7 +207,9 @@ quals_pd = SQLHandler(
 #     empre,
 #     empre_dtype
 #     ).to_sql_db()
-#
+
+# ---
+
 # estabele_dtype = {
 #     'cnpj_basico': 'object',
 #     'cnpj_ordem': 'object',
