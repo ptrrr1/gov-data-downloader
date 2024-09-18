@@ -190,7 +190,7 @@ socio_pd = SQLHandler(
     extracted_files,
     socio,
     socio_dtype
-    ).as_pdDataframe()
+    ).to_sql_db('socio', engine)
 
 # ---
 
@@ -207,7 +207,7 @@ empre_pd = SQLHandler(
     extracted_files,
     empre,
     empre_dtype
-    ).to_sql_db()
+    ).to_sql_db('empre', engine)
 
 # ---
 
@@ -248,7 +248,8 @@ estabele_pd = SQLHandler(
     extracted_files,
     estabele,
     estabele_dtype
-    ).to_sql_db()
+    ).to_sql_db('estebele', engine)
+
 
 # from sqlalchemy import MetaData
 #
