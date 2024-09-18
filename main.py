@@ -12,6 +12,9 @@ output = "./output"
 
 # Where the folders are
 url = "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/"
+
+# Whitelisting uses patterns to match against the zipped files names
+# No need to type it all like i did
 whitelist = [
     # "Municipios",
     # "Cnaes",
@@ -25,11 +28,20 @@ whitelist = [
     # "Estabele"
 ]
 
-# Donwloading only the most recent month
-# I recommend whitelisting small files and
-# after that, only downloading the big ones
-# But you may leave whitelist empty and download all of them
-# If it fails you can always just whitelist the ones that failed
+# start_range=-1 is to donwload only the most recent month.
+#
+# I recommend whitelisting small files and after that, only downloading the
+# big ones (For Async only).
+#
+# But you may leave whitelist empty and download all of them, if it fails you
+# can always just whitelist the ones that failed.
+#
+# There are some failsafes to not download a folder that has already been
+# downloaded, however, it works by finding the zipped file and comparing it's
+# size with the one on the link.
+# Non Async download does not have this because it downloads the file to the
+# memory and then extracts. Leaves a smaller fingerprint but is more memory
+# intensive.
 Downloader(url, output, whitelist).async_recursive_download(start_range=-1)
 
 # WARN: Throwing a 404 on async download despite having a status of 200

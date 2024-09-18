@@ -136,7 +136,7 @@ class Downloader:
         path = os.path.join(folder_path, file_name)
         try:
             async with session.get(url) as response:
-                # response.raise_for_status()
+                response.raise_for_status()
                 # If it hasn't been dowloaded yet, then download
                 # Since it compares the zip folder,
                 # if it is deleted then it'll try again
