@@ -1,9 +1,9 @@
 import os
+import credentials
 from downloader import Downloader
 from sqlhandler import SQLHandler
 import pandas as pd
 from sqlalchemy import create_engine
-import credentials
 
 # DOWNLOAD
 
@@ -91,66 +91,68 @@ engine = create_engine('postgresql://'+user+':'+passw +
                        '@'+host+':'+port+'/'+database)
 
 # Smaller Files
+# May be done all at once because they are quite quick
 
-#  cnae_dtype = {'codigo': 'object', 'descricao': 'object'}
-#  
-#  cnae_pd = SQLHandler(
-#      extracted_files,
-#      cnae,
-#      cnae_dtype
-#      ).to_sql_db('cnae', engine)
-#  
-#  # ---
-#  
-#  moti_dtype = {'codigo': 'object', 'descricao': 'object'}
-#  
-#  moti_pd = SQLHandler(
-#      extracted_files,
-#      moti,
-#      moti_dtype
-#      ).to_sql_db('moti', engine)
-#  
-#  # ---
-#  
-#  munic_dtype = {'codigo': 'object', 'descricao': 'object'}
-#  
-#  munic_pd = SQLHandler(
-#      extracted_files,
-#      munic,
-#      munic_dtype
-#      ).to_sql_db('munic', engine)
-#  
-#  natju_dtype = {'codigo': 'object', 'descricao': 'object'}
-#  
-#  # ---
-#  
-#  natju_pd = SQLHandler(
-#      extracted_files,
-#      natju,
-#      natju_dtype
-#      ).to_sql_db('natju', engine)
-#  
-#  # ---
-#  
-#  pais_dtype = {'codigo': 'object', 'descricao': 'object'}
-#  
-#  pais_pd = SQLHandler(
-#      extracted_files,
-#      pais,
-#      pais_dtype
-#      ).to_sql_db('pais', engine)
-#  
-#  # ---
-#  
-#  quals_dtype = {'codigo': 'object', 'descricao': 'object'}
-#  
-#  quals_pd = SQLHandler(
-#      extracted_files,
-#      quals,
-#      quals_dtype
-#      ).to_sql_db('quals', engine)
+cnae_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+cnae_pd = SQLHandler(
+    extracted_files,
+    cnae,
+    cnae_dtype
+    ).to_sql_db('cnae', engine)
+
+# ---
+
+moti_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+moti_pd = SQLHandler(
+    extracted_files,
+    moti,
+    moti_dtype
+    ).to_sql_db('moti', engine)
+
+# ---
+
+munic_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+munic_pd = SQLHandler(
+    extracted_files,
+    munic,
+    munic_dtype
+    ).to_sql_db('munic', engine)
+
+natju_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+# ---
+
+natju_pd = SQLHandler(
+    extracted_files,
+    natju,
+    natju_dtype
+    ).to_sql_db('natju', engine)
+
+# ---
+
+pais_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+pais_pd = SQLHandler(
+    extracted_files,
+    pais,
+    pais_dtype
+    ).to_sql_db('pais', engine)
+
+# ---
+
+quals_dtype = {'codigo': 'object', 'descricao': 'object'}
+
+quals_pd = SQLHandler(
+    extracted_files,
+    quals,
+    quals_dtype
+    ).to_sql_db('quals', engine)
 
 # Bigger Files
+# Best done one at a time
 
 simples_dtype = {
         'cnpj_basico': 'object',
@@ -170,84 +172,83 @@ simples_pd = SQLHandler(
 
 # ---
 
-# socio_dtype = {
-#     'cnpj_basico': 'object',
-#     'identificador_socio': 'Int32',
-#     'nome_socio_razao_social': 'object',
-#     'cpf_cnpj_socio': 'object',
-#     'qualificacao_socio': 'Int32',
-#     'data_entrada_sociedade': 'Int32',
-#     'pais': 'Int32',
-#     'representante_legal': 'object',
-#     'nome_do_representante': 'object',
-#     'qualificacao_representante_legal': 'Int32',
-#     'faixa_etaria': 'Int32'
-# }
-# 
-# socio_pd = SQLHandler(
-#     extracted_files,
-#     socio,
-#     socio_dtype
-#     ).as_pdDataframe()
+socio_dtype = {
+    'cnpj_basico': 'object',
+    'identificador_socio': 'Int32',
+    'nome_socio_razao_social': 'object',
+    'cpf_cnpj_socio': 'object',
+    'qualificacao_socio': 'Int32',
+    'data_entrada_sociedade': 'Int32',
+    'pais': 'Int32',
+    'representante_legal': 'object',
+    'nome_do_representante': 'object',
+    'qualificacao_representante_legal': 'Int32',
+    'faixa_etaria': 'Int32'
+}
+
+socio_pd = SQLHandler(
+    extracted_files,
+    socio,
+    socio_dtype
+    ).as_pdDataframe()
 
 # ---
 
-# empre_dtype = {
-#     'cnpj_basico': 'object',
-#     'razao_social': 'object',
-#     'natureza_juridica': 'Int32',
-#     'qualificacao_responsavel': 'Int32',
-#     'capital_social': 'float32',
-#     'porte_empresa': 'Int32',
-#     'ente_federativo_responsavel': 'object'
-# }
-#
-# empre_pd = SQLHandler(
-#     extracted_files,
-#     empre,
-#     empre_dtype
-#     ).to_sql_db()
+empre_dtype = {
+    'cnpj_basico': 'object',
+    'razao_social': 'object',
+    'natureza_juridica': 'Int32',
+    'qualificacao_responsavel': 'Int32',
+    'capital_social': 'float32',
+    'porte_empresa': 'Int32',
+    'ente_federativo_responsavel': 'object'
+}
+empre_pd = SQLHandler(
+    extracted_files,
+    empre,
+    empre_dtype
+    ).to_sql_db()
 
 # ---
 
-# estabele_dtype = {
-#     'cnpj_basico': 'object',
-#     'cnpj_ordem': 'object',
-#     'cnpj_dv': 'object',
-#     'identificador_matriz_filial': 'Int32',
-#     'nome_fantasia': 'object',
-#     'situacao_cadastral': 'Int32',
-#     'data_situacao_cadastral': 'Int32',
-#     'motivo_situacao_cadastral': 'Int32',
-#     'nome_cidade_exterior': 'object',
-#     'pais': 'object',
-#     'data_inicio_atividade': 'Int32',
-#     'cnae_fiscal_principal': 'Int32',
-#     'cnae_fiscal_secundaria': 'object',
-#     'tipo_logradouro': 'object',
-#     'logradouro': 'object',
-#     'numero': 'object',
-#     'complemento': 'object',
-#     'bairro': 'object',
-#     'cep': 'object',
-#     'uf': 'object',
-#     'municipio': 'Int32',
-#     'ddd_1': 'object',
-#     'telefone_1': 'object',
-#     'ddd_2': 'object',
-#     'telefone_2': 'object',
-#     'ddd_fax': 'object',
-#     'fax': 'object',
-#     'correio_eletronico': 'object',
-#     'situacao_especial': 'object',
-#     'data_situacao_especial': 'Int32'
-# }
-#
-# estabele_pd = SQLHandler(
-#     extracted_files,
-#     estabele,
-#     estabele_dtype
-#     ).to_sql_db()
+estabele_dtype = {
+    'cnpj_basico': 'object',
+    'cnpj_ordem': 'object',
+    'cnpj_dv': 'object',
+    'identificador_matriz_filial': 'Int32',
+    'nome_fantasia': 'object',
+    'situacao_cadastral': 'Int32',
+    'data_situacao_cadastral': 'Int32',
+    'motivo_situacao_cadastral': 'Int32',
+    'nome_cidade_exterior': 'object',
+    'pais': 'object',
+    'data_inicio_atividade': 'Int32',
+    'cnae_fiscal_principal': 'Int32',
+    'cnae_fiscal_secundaria': 'object',
+    'tipo_logradouro': 'object',
+    'logradouro': 'object',
+    'numero': 'object',
+    'complemento': 'object',
+    'bairro': 'object',
+    'cep': 'object',
+    'uf': 'object',
+    'municipio': 'Int32',
+    'ddd_1': 'object',
+    'telefone_1': 'object',
+    'ddd_2': 'object',
+    'telefone_2': 'object',
+    'ddd_fax': 'object',
+    'fax': 'object',
+    'correio_eletronico': 'object',
+    'situacao_especial': 'object',
+    'data_situacao_especial': 'Int32'
+}
+
+estabele_pd = SQLHandler(
+    extracted_files,
+    estabele,
+    estabele_dtype
+    ).to_sql_db()
 
 # from sqlalchemy import MetaData
 #
