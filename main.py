@@ -12,10 +12,25 @@ output = "./output"
 
 # Where the folders are
 url = "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/"
-whitelist = []
+whitelist = [
+    # "Municipios",
+    # "Cnaes",
+    # "Paises",
+    # "Naturezas",
+    # "Motivos",
+    # "Qualificacoes",
+    # "Simples",
+    # "Socios",
+    # "Empre",
+    # "Estabele"
+]
 
 # Donwloading only the most recent month
-# Downloader(url, output, whitelist).async_recursive_download(start_range=-1)
+# I recommend whitelisting small files and
+# after that, only downloading the big ones
+# But you may leave whitelist empty and download all of them
+# If it fails you can always just whitelist the ones that failed
+Downloader(url, output, whitelist).async_recursive_download(start_range=-1)
 
 # WARN: Throwing a 404 on async download despite having a status of 200
 # url = "https://dados.rfb.gov.br/CNPJ/"
@@ -249,7 +264,6 @@ estabele_pd = SQLHandler(
     estabele,
     estabele_dtype
     ).to_sql_db('estebele', engine)
-
 
 # from sqlalchemy import MetaData
 #

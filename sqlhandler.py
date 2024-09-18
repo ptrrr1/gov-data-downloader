@@ -5,14 +5,23 @@ from sqlalchemy import create_engine, text
 
 
 class SQLHandler:
+    """
+    :param str folder: Path of the folder containing the csv files
+    :param list path_list: list with CSV file names
+    :param dict dtypes: Dictionary with Column name and type
+    """
+
     def __init__(self, folder, path_list, dtypes):
         self.path_list = path_list
         self.folder = folder
         self.dtypes = dtypes
 
     def as_pdDataframe(self) -> pd.DataFrame:
-        # Only exists as means of exploring the csv file
-        # without loading everything into memory
+        """
+        Only exists as means of exploring the csv file
+        without loading everything into memory.
+        """
+
         df = pd.DataFrame(columns=self.dtypes.keys()).astype(self.dtypes)
         size_to_read = 1_024_000
 
@@ -35,6 +44,11 @@ class SQLHandler:
         return df
 
     def to_sql_db(self, name, engine):
+        """
+        :param str name: Name of table
+        :param engine: SQL Database connection made with SQLAlchemy
+        """
+
         size_to_read = 1_024_000
         lines = 0
         skiprows = 0
