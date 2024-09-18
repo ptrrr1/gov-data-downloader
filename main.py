@@ -126,27 +126,104 @@ quals_pd = SQLHandler(
 # Bigger Files
 
 # simples_dtype = {
-#         'cnpj_basico': object,
-#         'opcao_pelo_simples': object,
+#         'cnpj_basico': 'object',
+#         'opcao_pelo_simples': 'object',
 #         'data_opcao_simples': 'Int32',
 #         'data_exclusao_simples': 'Int32',
-#         'opcao_mei': object,
+#         'opcao_mei': 'object',
 #         'data_opcao_mei': 'Int32',
 #         'data_exclusao_mei': 'Int32'
 #         }
-# 
+#
 # simples_pd = SQLHandler(
 #     extracted_files,
 #     simples,
 #     simples_dtype
 #     ).to_sql_db('simples', engine)
+#
+# socio_dtype = {
+#     'cnpj_basico': 'object',
+#     'identificador_socio': 'Int32',
+#     'nome_socio_razao_social': 'object',
+#     'cpf_cnpj_socio': 'object',
+#     'qualificacao_socio': 'Int32',
+#     'data_entrada_sociedade': 'Int32',
+#     'pais': 'Int32',
+#     'representante_legal': 'object',
+#     'nome_do_representante': 'object',
+#     'qualificacao_representante_legal': 'Int32',
+#     'faixa_etaria': 'Int32'
+# }
+# 
+# socio_pd = SQLHandler(
+#     extracted_files,
+#     socio,
+#     socio_dtype
+#     ).as_pdDataframe()
+#
+# empre_dtype = {
+#     'cnpj_basico': 'object',
+#     'razao_social': 'object',
+#     'natureza_juridica': 'Int32',
+#     'qualificacao_responsavel': 'Int32',
+#     'capital_social': 'float32',
+#     'porte_empresa': 'Int32',
+#     'ente_federativo_responsavel': 'object'
+# }
+#
+# empre_pd = SQLHandler(
+#     extracted_files,
+#     empre,
+#     empre_dtype
+#     ).to_sql_db()
+#
+# estabele_dtype = {
+#     'cnpj_basico': 'object',
+#     'cnpj_ordem': 'object',
+#     'cnpj_dv': 'object',
+#     'identificador_matriz_filial': 'Int32',
+#     'nome_fantasia': 'object',
+#     'situacao_cadastral': 'Int32',
+#     'data_situacao_cadastral': 'Int32',
+#     'motivo_situacao_cadastral': 'Int32',
+#     'nome_cidade_exterior': 'object',
+#     'pais': 'object',
+#     'data_inicio_atividade': 'Int32',
+#     'cnae_fiscal_principal': 'Int32',
+#     'cnae_fiscal_secundaria': 'object',
+#     'tipo_logradouro': 'object',
+#     'logradouro': 'object',
+#     'numero': 'object',
+#     'complemento': 'object',
+#     'bairro': 'object',
+#     'cep': 'object',
+#     'uf': 'object',
+#     'municipio': 'Int32',
+#     'ddd_1': 'object',
+#     'telefone_1': 'object',
+#     'ddd_2': 'object',
+#     'telefone_2': 'object',
+#     'ddd_fax': 'object',
+#     'fax': 'object',
+#     'correio_eletronico': 'object',
+#     'situacao_especial': 'object',
+#     'data_situacao_especial': 'Int32'
+# }
+#
+# estabele_pd = SQLHandler(
+#     extracted_files,
+#     estabele,
+#     estabele_dtype
+#     ).to_sql_db()
 
 # from sqlalchemy import MetaData
-# 
+#
 # m = MetaData()
 # m.reflect(engine)
-# 
+#
 # for t in m.tables.values():
 #     print(t.name)
 #     for c in t.c:
 #         print(" "*10 + c.name)
+
+# pd.set_option("display.max_columns", 30)

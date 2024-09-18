@@ -10,41 +10,32 @@ class SQLHandler:
         self.dtypes = dtypes
 
     def as_pdDataframe(self) -> pd.DataFrame:
-        dt = pd.DataFrame(columns=self.dtypes.keys()).astype(self.dtypes)
-        size_to_read = 1_000_000
-        lines = 0
-        skiprows = 0
+        # Only exists as means of exploring the csv file
+        # without loading everything into memory
+        df = pd.DataFrame(columns=self.dtypes.keys()).astype(self.dtypes)
+        size_to_read = 1_024_000
 
-        for f in self.path_list:
-            path = os.path.join(self.folder, f)
+        path = os.path.join(self.folder, self.path_list[0])
 
-            with open(path) as file:
-                lines = sum(1 for _ in file)
+        df = pd.read_csv(
+            filepath_or_buffer=path,
+            sep=';',
+            nrows=size_to_read,
+            skiprows=0,
+            header=None,
+            dtype=self.dtypes,
+            names=self.dtypes.keys(),
+            encoding='latin-1',
+            decimal=','
+            )
 
-            chunk = math.ceil(lines / size_to_read)
+        df.reset_index()
 
-            for i in range(0, chunk):
-                df = pd.read_csv(
-                    filepath_or_buffer=path,
-                    sep=';',
-                    nrows=size_to_read,
-                    skiprows=skiprows,
-                    header=None,
-                    dtype=self.dtypes,
-                    names=self.dtypes.keys(),
-                    encoding='latin-1',
-                    )
-
-                df.reset_index()
-                dt = pd.concat([dt, df], ignore_index=True)
-
-                skiprows += size_to_read
-
-        return dt
+        return df
 
     def to_sql_db(self, name, engine):
-        # TODO: DROP TABLE BEFORE ADDING MORE DATA
-        size_to_read = 1_000_000
+        # TODO: DROP TABLE IF EXISTS BEFORE ADDING MORE DATA
+        size_to_read = 1_024_000
         lines = 0
         skiprows = 0
 
@@ -66,6 +57,7 @@ class SQLHandler:
                     dtype=self.dtypes,
                     names=self.dtypes.keys(),
                     encoding='latin-1',
+                    decimal=','
                     )
 
                 df.reset_index()
@@ -81,6 +73,7 @@ class SQLHandler:
                     )
 
     def __to_sql(self, df, **kwargs):
+        # Break down the file in chunks and then push to database
         size = 4096
         total = len(df)
 
