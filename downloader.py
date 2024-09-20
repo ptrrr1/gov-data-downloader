@@ -53,8 +53,13 @@ class Downloader:
         return False
 
     def __get_url_response(self, url):
+        headers = {
+            'accept': 'application/json',
+            'chave-api-dados-abertos': credentials.token
+        }
+
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers)
             response.raise_for_status()
             return response
         except requests.exceptions.HTTPError as http_err:
@@ -63,6 +68,7 @@ class Downloader:
             print(f"Some error occurred: {e}")
 
     def __get_folders_link(self) -> list:
+        # TODO: USE THE API
         soup = BeautifulSoup(self.response.text, "html.parser")
         links = [
                     a['href'] for a in soup.find_all('a', href=True)
@@ -73,6 +79,7 @@ class Downloader:
         return links[1:]
 
     def __get_zip_links(self, url) -> list:
+        # TODO: USE THE API
         response = self.__get_url_response(url)
         soup = BeautifulSoup(response.text, "html.parser")
         links = [
